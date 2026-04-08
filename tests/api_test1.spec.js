@@ -3,13 +3,11 @@ import exp from 'constants';
 //import { request } from 'https';
 //import { request } from 'http';
 //import { ClientRequest, request } from 'http';
-
 test('API Delete Request', async({request}) => {
     const response = await request.delete('https://reqres.in/api/users/2')
    // https://reqres.in/api/users/2
    //https://reqres.in/api/users?page=2
     expect(response.status()).toBe(204)
-
 });
 
 test('API PUT Request', async ({request}) => {
@@ -20,10 +18,8 @@ test('API PUT Request', async ({request}) => {
         }
     })
     expect(response.status()).toBe(200)
-
     const text = await response.text();
     expect(text).toContain('Saife')
-
     console.log(await response.json());
 
 })
@@ -39,7 +35,6 @@ test('API POST Request', async({request}) => {
 
     const text = await response.text();
     expect(text).toContain('leader')
-
     console.log(await response.json());
 })
 
