@@ -1,120 +1,109 @@
-<<<<<<< HEAD
-// import { test, expect } from '@playwright/test';
-// import exp from 'constants';
-// //import { request } from 'https';
-// //import { request } from 'http';
-// //import { ClientRequest, request } from 'http';
-
-// test('API Delete Request', async({request}) => {
-//     const response = await request.delete('https://reqres.in/api/users/2')
-//    // https://reqres.in/api/users/2
-//    //https://reqres.in/api/users?page=2
-//     expect(response.status()).toBe(204)
-
-// });
-
-// test('API PUT Request', async ({request}) => {
-//     const response = await request.put('https://reqres.in/api/users/2', {
-//         data: {
-//             "name": "Saife",
-//             "job": "Software"
-//         }
-//     })
-//     expect(response.status()).toBe(200)
-
-//     const text = await response.text();
-//     expect(text).toContain('Saife')
-
-//     console.log(await response.json());
-=======
 import { test, expect } from '@playwright/test';
-import exp from 'constants';
-//import { request } from 'https';
-//import { request } from 'http';
-//import { ClientRequest, request } from 'http';
-test('API Delete Request', async({request}) => {
-    const response = await request.delete('https://reqres.in/api/users/2')
-   // https://reqres.in/api/users/2
-   //https://reqres.in/api/users?page=2
-    expect(response.status()).toBe(204)
-});
-
-test('API PUT Request', async ({request}) => {
-    const response = await request.put('https://reqres.in/api/users/2', {
-        data: {
-            "name": "Saife",
-            "job": "Software"
-        }
-    })
-    expect(response.status()).toBe(200)
-    const text = await response.text();
-    expect(text).toContain('Saife')
-    console.log(await response.json());
->>>>>>> 9892319686839ea5d1987240ea0a19d3c6ac978a
-
-// })
-
-// test('API POST Request', async({request}) => {
-//     const response = await request.post('https://reqres.in/api/users', {
-//         data: {
-//             "name": "morpheus",
-//             "job": "leader"
-//         }
-//     })
-//     expect(response.status).toBe(201)
-
-<<<<<<< HEAD
-//     const text = await response.text();
-//     expect(text).toContain('leader')
-
-//     console.log(await response.json());
-// })
-=======
-    const text = await response.text();
-    expect(text).toContain('leader')
-    console.log(await response.json());
-})
->>>>>>> 9892319686839ea5d1987240ea0a19d3c6ac978a
-
-// test('API Get Request', async({request}) => {
-//     const response = await request.get('https://reqres.in/api/users/2')
-//    // https://reqres.in/api/users/2
-//    //https://reqres.in/api/users?page=2
-//     expect(response.status()).toBe(200)
-
-//     const text = await response.text();
-//     expect(text).toContain('Janet')
-
-//     console.log(await response.json());
-
-// });
 
 test.describe('Validate API Headers', () => {
+    const baseUrl = 'https://reqres.in/api';
 
-  test('Validate headers from GET API response', async ({ request }) => {
+    test('Validate headers from GET API response', async ({ request }) => {
 
-    // Send API request
-    const response = await request.get('https://reqres.in/api/users?page=2');
+        // Send API request
+        const response = await request.get('https://reqres.in/api/');
+        //`${baseUrl}`
 
-    // Validate status
-    expect(response.ok()).toBeTruthy();
+        // Validate status
+        expect(response.ok()).toBeTruthy();
 
-    // Get headers as an object
-    const headers = response.headers();
+        // Extract headers
+        const headers = response.headers();
+        const dateHeader = headers['date'];   // Example: "Sat, 06 Jun 2026 15:20:00 GMT"
 
-    // Example validations
-    expect(headers['content-type']).toContain('application/json');
-    expect(headers['cache-control']).toBeDefined();
+        console.log("Date Header:", dateHeader);
 
-    console.log("Headers:", headers);
+        // Convert header date to JS Date object
+        const serverDate = new Date(dateHeader);
 
-    // Get headers as an array (alternative)
-    const headerArray = response.headersArray();
-    console.log("Header Array:", headerArray);
+        // Get today's date in UTC (server header is usually GMT/UTC)
+        const todayUTC = new Date();
+        const todayDay = todayUTC.getUTCDate();
+        const todayMonth = todayUTC.getUTCMonth();
+        const todayYear = todayUTC.getUTCFullYear();
 
-    // Validate using array format
-    const contentTypeHeader = headerArray.find(h => h.name === 'content-type');
-    expect(contentTypeHeader.value).toContain('application/json');
-  });
+        // Compare only the date portion (ignoring time)
+        expect(serverDate.getUTCDate()).toBe(todayDay);
+        expect(serverDate.getUTCMonth()).toBe(todayMonth);
+        expect(serverDate.getUTCFullYear()).toBe(todayYear);
+
+        console.log("✔ API Date header matches today's date (UTC)");
+
+        // Example validations
+        expect(headers['content-type']).toContain('application/json');
+        //expect(headers['Connection']).toBeDefined();
+        //expect(headers['Connection']).toContain('keep-alive');        
+        expect(headers['cache-control']).toBeDefined();
+        expect(headers['cache-control']).toContain('max-age=14400');
+        expect(headers['transfer-encoding']).toBeDefined();
+        expect(headers['transfer-encoding']).toContain('chunked');
+        expect(headers['cross-origin-opener-policy']).toBeDefined();
+        expect(headers['cross-origin-opener-policy']).toContain('same-origin');
+        expect(headers['cross-origin-resource-policy']).toBeDefined();
+        expect(headers['cross-origin-resource-policy']).toContain('same-origin');
+        expect(headers['referrer-policy']).toBeDefined();
+        expect(headers['referrer-policy']).toContain('strict-origin-when-cross-origin');
+       // expect(headers['Strict-Transport-Security']).toBeDefined();
+       // expect(headers['Strict-Transport-Security']).toContain('max-age=31536000; includeSubDomains');
+        expect(headers['cf-cache-status']).toBeDefined();
+        expect(headers['cf-cache-status']).toContain('HIT');        
+
+
+        //Get the Response Headerrs as Array:
+        const resHeaderArray = response.headersArray();
+        console.log(resHeaderArray);
+        expect(resHeaderArray).toBeDefined();
+        const contentTypeHd = resHeaderArray.find(h => h.name === 'Content-Type');
+        expect(contentTypeHd).toBeDefined();
+        expect(contentTypeHd.value).toContain('application/json; charset=utf-8');
+    });
+
+    test('Validate API Date header including hour and minutes', async ({ request }) => {
+
+        // Send GET request
+        const response = await request.get(`${baseUrl}`);
+        expect(response.ok()).toBeTruthy();
+
+        // Extract the Date header
+        const headers = response.headers();
+        const dateHeader = headers['date'];   // Example: "Sat, 06 Jun 2026 15:20:00 GMT"
+
+        console.log("Date Header:", dateHeader);
+
+        // Convert header date to JS Date object
+        const serverDate = new Date(dateHeader);
+
+        // Get current UTC time (API Date header is usually GMT/UTC)
+        const now = new Date();
+
+        // Extract components
+        const serverYear = serverDate.getUTCFullYear();
+        const serverMonth = serverDate.getUTCMonth();
+        const serverDay = serverDate.getUTCDate();
+        const serverHour = serverDate.getUTCHours();
+        const serverMinute = serverDate.getUTCMinutes();
+
+        const nowYear = now.getUTCFullYear();
+        const nowMonth = now.getUTCMonth();
+        const nowDay = now.getUTCDate();
+        const nowHour = now.getUTCHours();
+        const nowMinute = now.getUTCMinutes();
+
+        // Validate date (year, month, day)
+        expect(serverYear).toBe(nowYear);
+        expect(serverMonth).toBe(nowMonth);
+        expect(serverDay).toBe(nowDay);
+
+        // Validate hour and minute (allowing ±1 minute drift)
+        expect(Math.abs(serverHour - nowHour)).toBeLessThanOrEqual(0);
+        expect(Math.abs(serverMinute - nowMinute)).toBeLessThanOrEqual(1);
+
+        console.log("✔ API Date header matches today's date and current hour/minute (UTC)");
+    });
 
 });
