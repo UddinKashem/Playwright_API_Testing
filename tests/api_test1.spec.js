@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Validate API Headers', () => {
+test.describe('Validate API Response', () => {
     const baseUrl = 'https://reqres.in/api';
 
     test('Validate headers from GET API response', async ({ request }) => {
@@ -48,10 +48,10 @@ test.describe('Validate API Headers', () => {
         expect(headers['cross-origin-resource-policy']).toContain('same-origin');
         expect(headers['referrer-policy']).toBeDefined();
         expect(headers['referrer-policy']).toContain('strict-origin-when-cross-origin');
-       // expect(headers['Strict-Transport-Security']).toBeDefined();
-       // expect(headers['Strict-Transport-Security']).toContain('max-age=31536000; includeSubDomains');
+        // expect(headers['Strict-Transport-Security']).toBeDefined();
+        // expect(headers['Strict-Transport-Security']).toContain('max-age=31536000; includeSubDomains');
         expect(headers['cf-cache-status']).toBeDefined();
-        expect(headers['cf-cache-status']).toContain('HIT');        
+        expect(headers['cf-cache-status']).toContain('HIT');
 
 
         //Get the Response Headerrs as Array:
@@ -77,9 +77,11 @@ test.describe('Validate API Headers', () => {
 
         // Convert header date to JS Date object
         const serverDate = new Date(dateHeader);
+        console.log(serverDate);
 
         // Get current UTC time (API Date header is usually GMT/UTC)
         const now = new Date();
+        console.log(now);
 
         // Extract components
         const serverYear = serverDate.getUTCFullYear();
@@ -87,12 +89,15 @@ test.describe('Validate API Headers', () => {
         const serverDay = serverDate.getUTCDate();
         const serverHour = serverDate.getUTCHours();
         const serverMinute = serverDate.getUTCMinutes();
+        const serverSeconds = serverDate.getUTCSeconds();
 
         const nowYear = now.getUTCFullYear();
         const nowMonth = now.getUTCMonth();
         const nowDay = now.getUTCDate();
         const nowHour = now.getUTCHours();
         const nowMinute = now.getUTCMinutes();
+        const nowSeconds = now.getUTCSeconds();
+        console.log(nowSeconds);
 
         // Validate date (year, month, day)
         expect(serverYear).toBe(nowYear);
@@ -102,8 +107,72 @@ test.describe('Validate API Headers', () => {
         // Validate hour and minute (allowing ±1 minute drift)
         expect(Math.abs(serverHour - nowHour)).toBeLessThanOrEqual(0);
         expect(Math.abs(serverMinute - nowMinute)).toBeLessThanOrEqual(1);
+        expect(Math.abs(serverSeconds - nowSeconds)).toBeLessThanOrEqual(1);
 
         console.log("✔ API Date header matches today's date and current hour/minute (UTC)");
+    });
+
+    test('Validate Response Body JSON', async ({ request }) => {
+        // Send GET request
+        const response = await request.get(`${baseUrl}`);
+        expect(response.ok()).toBeTruthy();
+
+        //Get Response Body as JSON:
+        const resJSON = await response.json();
+        console.log("Response Body JSON:", resJSON);
+
+        // Validate fields in the response body
+        expect(resJSON).toHaveProperty('name');
+        expect(resJSON).toHaveProperty('version');
+        expect(resJSON).toHaveProperty('description');
+        expect(resJSON).toHaveProperty('documentation');
+        expect(resJSON).toHaveProperty('endpoints');
+        expect(resJSON).toHaveProperty('features');
+
+
+        // Validate actual values
+        expect(resJSON.name).toBe('ReqRes API');
+        expect(resJSON.version).toBe('1.0.0');
+        expect(resJSON.description).toContain('Backend platform for frontend developers, testers,');
+        expect(resJSON.documentation).toContain('/docs');
+
+        // Validate "endpoints" exists
+        expect(resJSON).toHaveProperty('endpoints');
+
+        const endpoints = resJSON.endpoints;
+
+        // Validate endpoints is an object
+        expect(typeof endpoints).toBe('object');
+        expect(Array.isArray(endpoints)).toBe(false);
+
+        // Validate each key contains a string value
+        for (const key of Object.keys(endpoints)) {
+            expect(typeof endpoints[key]).toBe('string');
+        }
+
+        // Validate expected values
+        expect(endpoints.free).toBe('/api/users');
+        expect(endpoints.pro).toBe('/custom-endpoints');
+        expect(endpoints.health).toBe('/health');
+
+        // Validate "features" exists
+        expect(resJSON).toHaveProperty('features');
+
+        const features = resJSON.features;
+
+        // Validate it's an array
+        expect(Array.isArray(features)).toBeTruthy();
+
+        // Validate each item is a string
+        for (const item of features) {
+            expect(typeof item).toBe('string');
+        }
+
+        // Validate expected values
+        expect(features).toContain('Fake data generation');
+        expect(features).toContain('Custom endpoints (Pro)');
+        expect(features).toContain('Stripe subscriptions');
+
     });
 
 });
