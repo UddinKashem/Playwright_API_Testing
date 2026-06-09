@@ -10,6 +10,9 @@ test.describe('JSONPlaceholder API Testing Suite', () => {
         //users`);
     expect(response.ok()).toBeTruthy();
     expect(response.status()).toBe(200);
+
+    //Response Headers
+    
     // const users = await response.json();
     // expect(users.length).toBeGreaterThan(0);
   });
